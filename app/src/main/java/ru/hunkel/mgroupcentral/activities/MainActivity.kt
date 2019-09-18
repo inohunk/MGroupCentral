@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         fun bind(module: Module) {
             itemView.app_id_text_view.text = "id: ${module.id}"
             itemView.app_package_text_view.text = "package: ${module.appPackage}"
+            itemView.app_settings_text_view.text = "settings: ${module.appSettings}"
         }
     }
 

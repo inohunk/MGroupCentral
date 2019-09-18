@@ -18,4 +18,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/app_settings_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp" />
 </LinearLayout>
