@@ -19,11 +19,14 @@ class MGroupService : Service() {
             val newModule = Module(
                 appPackage = appPackage!!
             )
-            mDatabaseManager.actionAddModule(newModule)
-            Log.i(
-                TAG, ".\nNew app registration\n" +
-                        "\t\tpackage: $appPackage"
-            )
+            val module = mDatabaseManager.actionGetModuleByPackage(appPackage)
+            if (module == null) {
+                mDatabaseManager.actionAddModule(newModule)
+                Log.i(
+                    TAG, ".\nNew app registration\n" +
+                            "\t\tpackage: $appPackage"
+                )
+            }
         }
 
         override fun registerWithSettings(appPackage: String?, appSettings: String?) {
@@ -31,12 +34,15 @@ class MGroupService : Service() {
                 appPackage = appPackage!!,
                 appSettings = appSettings!!
             )
-            mDatabaseManager.actionAddModule(newModule)
-            Log.i(
-                TAG, ".\nNew app registration\n" +
-                        "\t\tpackage: $appPackage" +
-                        "\t\tsettings: $appSettings"
-            )
+            val module = mDatabaseManager.actionGetModuleByPackage(appPackage)
+            if (module == null) {
+                mDatabaseManager.actionAddModule(newModule)
+                Log.i(
+                    TAG, ".\nNew app registration\n" +
+                            "\t\tpackage: $appPackage" +
+                            "\t\tsettings: $appSettings"
+                )
+            }
         }
     }
 

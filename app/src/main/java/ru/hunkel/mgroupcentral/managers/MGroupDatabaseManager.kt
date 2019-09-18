@@ -29,4 +29,18 @@ class MGroupDatabaseManager(context: Context) {
         )
         return modules
     }
+
+    fun actionGetModuleByPackage(appPackage: String): Module? {
+        val module = mDatabase.trackingModel().getModuleByPackage(appPackage)
+        if (module != null) {
+            Log.i(
+                TAG, ".\n" +
+                        "GET MODULE PACKAGE:\n" +
+                        "\t\tid: ${module.id}" +
+                        "\t\tpackage: ${module.appPackage}" +
+                        "\t\tsettings: ${module.appSettings}"
+            )
+        }
+        return module
+    }
 }
