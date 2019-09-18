@@ -1,4 +1,4 @@
-package ru.hunkel.mgroupcentral
+package ru.hunkel.mgroupcentral.activities
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -17,7 +17,7 @@
             android:exported="true"
             android:process=":MGroupService" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
