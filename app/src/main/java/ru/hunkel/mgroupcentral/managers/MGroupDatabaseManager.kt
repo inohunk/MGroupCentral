@@ -21,6 +21,12 @@ class MGroupDatabaseManager(context: Context) {
     }
 
     fun actionGetAllModules(): List<Module> {
-        return mDatabase.trackingModel().getAllModules()
+        val modules = mDatabase.trackingModel().getAllModules()
+        Log.i(
+            TAG, ".\n" +
+                    "GET ALL MODULES:\n" +
+                    "\t\tsize: ${modules.size}"
+        )
+        return modules
     }
 }

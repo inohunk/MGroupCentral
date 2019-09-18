@@ -14,6 +14,7 @@ import ru.hunkel.mgroupcentral.database.dao.entities.Module
 import ru.hunkel.mgroupcentral.managers.MGroupDatabaseManager
 
 const val TAG = "MainActivity"
+
 class MainActivity : AppCompatActivity() {
 
     lateinit var mAppRecyclerView: RecyclerView
@@ -27,9 +28,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         update_modules_list_button.setOnClickListener {
-            mModulesList = mDatabaseManager.actionGetAllModules().toMutableList()
-            mAppAdapter.notifyDataSetChanged()
+            syncListWithDatabase()
         }
+
         mDatabaseManager = MGroupDatabaseManager(this)
         mAppRecyclerView = app_list
         mAppRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -56,12 +57,23 @@ class MainActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: AppListViewHolder, position: Int) {
             holder.bind(moduleList[position])
         }
+
+        fun updateItems(list: List<Module>) {
+            moduleList.clear()
+            moduleList = list.toMutableList()
+            notifyDataSetChanged()
+        }
     }
 
     private class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(module: Module) {
-            itemView.app_id_text_view.text = module.id.toString()
-            itemView.app_package_text_view.text = module.appPackage
+            itemView.app_id_text_view.text = "id: ${module.id}"
+            itemView.app_package_text_view.text = "package: ${module.appPackage}"
         }
+    }
+
+    private fun syncListWithDatabase() {
+        mModulesList = mDatabaseManager.actionGetAllModules().toMutableList()
+        mAppAdapter.updateItems(mModulesList)
     }
 }
