@@ -9,6 +9,15 @@
         android:id="@+id/app_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/update_modules_list_button"
         android:orientation="vertical" />
+
+    <Button
+        android:id="@+id/update_modules_list_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="update" />
 
 </RelativeLayout>

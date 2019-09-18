@@ -5,21 +5,38 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.item_app.view.*
+import ru.hunkel.mgroupcentral.R
 import ru.hunkel.mgroupcentral.database.dao.entities.Module
+import ru.hunkel.mgroupcentral.managers.MGroupDatabaseManager
 
+const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
+
     lateinit var mAppRecyclerView: RecyclerView
     private lateinit var mAppAdapter: AppListAdapter
+    lateinit var mDatabaseManager: MGroupDatabaseManager
+
+    private var mModulesList: MutableList<Module> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        update_modules_list_button.setOnClickListener {
+            mModulesList = mDatabaseManager.actionGetAllModules().toMutableList()
+            mAppAdapter.notifyDataSetChanged()
+        }
+        mDatabaseManager = MGroupDatabaseManager(this)
         mAppRecyclerView = app_list
-        //TODO data to list
-        mAppRecyclerView.adapter = AppListAdapter(mutableListOf())
+        mAppRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        mModulesList = mDatabaseManager.actionGetAllModules().toMutableList()
+
+        mAppRecyclerView.adapter = AppListAdapter(mModulesList)
         mAppAdapter = mAppRecyclerView.adapter as AppListAdapter
     }
 
@@ -43,7 +60,8 @@ class MainActivity : AppCompatActivity() {
 
     private class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(module: Module) {
-
+            itemView.app_id_text_view.text = module.id.toString()
+            itemView.app_package_text_view.text = module.appPackage
         }
     }
 }
