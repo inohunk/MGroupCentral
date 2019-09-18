@@ -15,4 +15,7 @@ interface ModulesDao {
 
     @Query("SELECT * FROM module")
     fun getAllModules(): List<Module>
+
+    @Query("SELECT * FROM module WHERE appPackage=:appPackage")
+    fun getModuleByPackage(appPackage: String): Module
 }
