@@ -1,5 +1,5 @@
 package ru.hunkel.mgroupcentral;
 
 interface IMGroupApplication {
-    void register(String appPackage);
+    void register(String appPackage,String appSettings);
 }

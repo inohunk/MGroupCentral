@@ -15,14 +15,16 @@ class MGroupService : Service() {
     private lateinit var mDatabaseManager: MGroupDatabaseManager
 
     inner class MGroupServiceImpl : IMGroupApplication.Stub() {
-        override fun register(appPackage: String?) {
+        override fun register(appPackage: String?, appSettings: String?) {
             val newModule = Module(
-                appPackage = appPackage!!
+                appPackage = appPackage!!,
+                appSettings = appSettings!!
             )
             mDatabaseManager.actionAddModule(newModule)
             Log.i(
                 TAG, ".\nNew app registration\n" +
-                        "\t\tpackage: $appPackage"
+                        "\t\tpackage: $appPackage" +
+                        "\t\tsettings: $appSettings"
             )
         }
     }

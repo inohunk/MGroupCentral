@@ -9,5 +9,7 @@ data class Module(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
 
-    val appPackage: String
+    val appPackage: String,
+
+    val appSettings: String
 )
