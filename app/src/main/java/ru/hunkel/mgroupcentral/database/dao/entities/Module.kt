@@ -11,5 +11,5 @@ data class Module(
 
     val appPackage: String,
 
-    val appSettings: String
+    val appSettings: String = ""
 )
