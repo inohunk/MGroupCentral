@@ -38,7 +38,7 @@ class MGroupService : Service() {
             if (module == null) {
                 mDatabaseManager.actionAddModule(newModule)
                 Log.i(
-                    TAG, ".\nNew app registration\n" +
+                    TAG, ".\nNew app registration with settings\n" +
                             "\t\tpackage: $appPackage" +
                             "\t\tsettings: $appSettings"
                 )

@@ -1,27 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
     android:background="@drawable/shape_item_app"
-    android:orientation="vertical"
-    android:padding="5dp">
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/app_id_text_view"
-        android:layout_width="match_parent"
+        android:id="@+id/module_id_text_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
+        android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/app_package_text_view"
-        android:layout_width="match_parent"
+        android:id="@+id/module_package_text_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp" />
+        android:layout_below="@id/module_id_text_view"
+        android:layout_margin="5dp"
+        android:textSize="15sp" />
 
     <TextView
-        android:id="@+id/app_settings_text_view"
-        android:layout_width="match_parent"
+        android:id="@+id/module_settings_text_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp" />
-</LinearLayout>
+        android:layout_below="@id/module_package_text_view"
+        android:layout_margin="5dp"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/module_settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="5dp"
+        android:text="Settings" />
+
+
+</RelativeLayout>
