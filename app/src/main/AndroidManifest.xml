@@ -11,6 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".activities.GeneralSettingsActivity"
+            android:label="@string/title_activity_general_settings"></activity>
+
         <service
             android:name=".services.MGroupService"
             android:enabled="true"
