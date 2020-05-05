@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import ru.hunkel.mgroupcentral.database.dao.entities.Module
+import ru.hunkel.mgroupcentral.database.entities.Module
 
 @Dao
 interface ModulesDao {

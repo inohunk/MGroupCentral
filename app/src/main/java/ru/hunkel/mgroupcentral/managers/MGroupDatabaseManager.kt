@@ -3,7 +3,7 @@ package ru.hunkel.mgroupcentral.managers
 import android.content.Context
 import android.util.Log
 import ru.hunkel.mgroupcentral.database.MGroupDatabase
-import ru.hunkel.mgroupcentral.database.dao.entities.Module
+import ru.hunkel.mgroupcentral.database.entities.Module
 
 const val TAG = "MGroupDatabaseManager"
 

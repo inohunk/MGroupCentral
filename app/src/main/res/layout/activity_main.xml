@@ -5,4 +5,28 @@
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
+    <Button
+        android:id="@+id/start_stop_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Start"
+        android:textAllCaps="false" />
+
+    <CheckBox
+        android:id="@+id/use_gps_tracking_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/use_bluetooth_tracking_checkbox"
+        android:layout_centerHorizontal="true"
+        android:text="Use GPS Tracking" />
+
+    <CheckBox
+        android:id="@+id/use_bluetooth_tracking_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/start_stop_button"
+        android:layout_centerHorizontal="true"
+        android:text="Use Bluetooth Tracking" />
 </RelativeLayout>

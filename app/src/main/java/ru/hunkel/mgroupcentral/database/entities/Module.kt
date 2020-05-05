@@ -1,4 +1,4 @@
-package ru.hunkel.mgroupcentral.database.dao.entities
+package ru.hunkel.mgroupcentral.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -11,5 +11,7 @@ data class Module(
 
     val appPackage: String,
 
-    val appSettings: String = ""
+    val appSettings: String = "",
+
+    val appService: String = ""
 )
