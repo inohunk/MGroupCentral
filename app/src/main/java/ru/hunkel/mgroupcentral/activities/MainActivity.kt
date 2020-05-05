@@ -1,7 +1,6 @@
 package ru.hunkel.mgroupcentral.activities
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -58,14 +57,6 @@ class MainActivity : AppCompatActivity() {
             changeTrackingState()
             updateUI()
         }
-        call_button.setOnClickListener {
-            try {
-                mMGroupService!!.start()
-                mGpsService!!.startTracking()
-            } catch (ex: Exception) {
-
-            }
-        }
     }
 
     private fun showMessage(string: String) {
@@ -78,18 +69,16 @@ class MainActivity : AppCompatActivity() {
             stopOGPSTrackerService()
             showMessage("Stopped")
         } else {
-//            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
-//                startOGPSTrackerService()
-//                startMGroupTrackerService()
-//            }
-//            if (use_gps_tracking_checkbox.isChecked) {
-//                startOGPSTrackerService()
-//            }
-//            if (use_bluetooth_tracking_checkbox.isChecked) {
-//                startMGroupTrackerService()
-//            }
-            startMGroupTrackerService()
-            startOGPSTrackerService()
+            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
+                startOGPSTrackerService()
+                startMGroupTrackerService()
+            }
+            if (use_gps_tracking_checkbox.isChecked) {
+                startOGPSTrackerService()
+            }
+            if (use_bluetooth_tracking_checkbox.isChecked) {
+                startMGroupTrackerService()
+            }
         }
         mIsTracking = !mIsTracking
     }
@@ -121,7 +110,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("LogNotTimber")
     private fun startOGPSTrackerService() {
         val serviceIntent = Intent()
         serviceIntent.component = ComponentName(
@@ -184,21 +172,7 @@ class MainActivity : AppCompatActivity() {
                         //                                        //Do nothing
                     })
                 .show()
-
-            // Show an expanation to the user *asynchronously* -- don't block
-            // this thread waiting for the user's response! After the user
-            // sees the explanation, try again to request the permission.
         } else {
-
-            // No explanation needed, we can request the permission.
-            ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                1
-            )
-
-            // MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
         }
     }
 
@@ -213,7 +187,6 @@ class MainActivity : AppCompatActivity() {
             stopService(serviceIntent)
         } catch (ex: Exception) {
             i(TAG, ex.message)
-//            ex.printStackTrace()
         }
     }
 
@@ -222,13 +195,11 @@ class MainActivity : AppCompatActivity() {
     var mMGroupServiceStarted: Boolean = false
 
     private val mMGroupTrackerServiceConnection = object : ServiceConnection {
-        @SuppressLint("LogNotTimber")
         override fun onServiceDisconnected(name: ComponentName?) {
             mGpsService = null
             i(TAG_M_GROUP_SERVICE, "MGroup service disconnected")
         }
 
-        @SuppressLint("LogNotTimber")
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mMGroupService = IRSSILoggerService.Stub.asInterface(service)
 
@@ -246,7 +217,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("LogNotTimber")
     private fun startMGroupTrackerService() {
 
         val serviceIntent = Intent()
@@ -267,19 +237,6 @@ class MainActivity : AppCompatActivity() {
         } catch (ex: Exception) {
             Log.e(TAG_O_GPS_CENTER, ex.message)
         }
-
-//        startService(serviceIntent)
-
-//        bindService(
-//            serviceIntent,
-//            mMgroupTrackerServiceConnection,
-//            Context.BIND_WAIVE_PRIORITY
-//        )
-//        bindService(
-//            intent,
-//            mMGroupTrackerServiceConnection,
-//            Context.BIND_AUTO_CREATE
-//        )
     }
 
     private fun stopMGroupTrackerService() {
@@ -309,6 +266,4 @@ class MainActivity : AppCompatActivity() {
             use_gps_tracking_checkbox.isEnabled = true
         }
     }
-
-
 }
