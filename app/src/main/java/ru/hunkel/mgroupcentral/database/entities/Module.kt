@@ -3,7 +3,7 @@ package ru.hunkel.mgroupcentral.database.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "module")
+@Entity(tableName = "module", ignoredColumns = ["expanded"])
 data class Module(
 
     @PrimaryKey(autoGenerate = true)
@@ -14,4 +14,6 @@ data class Module(
     val appSettings: String = "",
 
     val appService: String = ""
-)
+) {
+    var expanded: Boolean = false
+}

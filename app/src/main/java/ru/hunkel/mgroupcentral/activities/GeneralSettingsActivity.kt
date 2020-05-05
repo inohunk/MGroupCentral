@@ -7,14 +7,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_app.view.*
 import kotlinx.android.synthetic.main.settings_activity.*
 import ru.hunkel.mgroupcentral.R
-import ru.hunkel.mgroupcentral.database.dao.entities.Module
+import ru.hunkel.mgroupcentral.database.entities.Module
 import ru.hunkel.mgroupcentral.managers.MGroupDatabaseManager
+import ru.hunkel.mgroupcentral.models.MODULE_TITLES
 
 class GeneralSettingsActivity : AppCompatActivity() {
 
@@ -42,9 +44,8 @@ class GeneralSettingsActivity : AppCompatActivity() {
         mAppAdapter = mAppRecyclerView.adapter as AppListAdapter
     }
 
-
     private inner class AppListAdapter(private var moduleList: MutableList<Module>) :
-        RecyclerView.Adapter<AppListViewHolder>() {
+        RecyclerView.Adapter<AppListAdapter.AppListViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppListViewHolder {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_app, parent, false)
@@ -57,6 +58,8 @@ class GeneralSettingsActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: AppListViewHolder, position: Int) {
             holder.bind(moduleList[position])
+            val isExpanded: Boolean = moduleList.get(position).expanded
+            holder.expandableLayout.visibility = if (isExpanded) View.VISIBLE else View.GONE
         }
 
         fun updateItems(list: List<Module>) {
@@ -66,39 +69,48 @@ class GeneralSettingsActivity : AppCompatActivity() {
         }
 
         fun getItems() = moduleList
-    }
 
-    private inner class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(module: Module) {
-            itemView.module_id_text_view.text = "id: ${module.id}"
-            itemView.module_package_text_view.text = "${module.appPackage}"
-            itemView.module_settings_text_view.text = "${module.appSettings}"
-            itemView.setOnClickListener {
-                try {
-                    val module = mAppAdapter.getItems()[adapterPosition]
+        private inner class AppListViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+            lateinit var expandableLayout: LinearLayout
 
-                    val intent = Intent()
-                    intent.component = ComponentName(
-                        module.appPackage,
-                        module.appSettings
-                    )
-                    startActivity(intent)
-                } catch (ex: Exception) {
-                    Log.e(TAG, ex.message)
+            fun bind(module: Module) {
+                itemView.module_package_text_view.text = MODULE_TITLES[module.appPackage]
+                expandableLayout = view.expandable_layout
+
+                itemView.setOnClickListener {
+                    val module: Module = moduleList.get(adapterPosition)
+                    module.expanded = !module.expanded
+                    notifyItemChanged(adapterPosition)
                 }
-            }
-            itemView.module_settings_button.setOnClickListener {
-                try {
-                    val module = mAppAdapter.getItems()[adapterPosition]
 
-                    val intent = Intent()
-                    intent.component = ComponentName(
-                        module.appPackage,
-                        module.appSettings
-                    )
-                    startActivity(intent)
-                } catch (ex: Exception) {
-                    Log.e(TAG, ex.message)
+                itemView.registration_text_view.setOnClickListener {
+                    try {
+                        val module = mAppAdapter.getItems()[adapterPosition]
+
+                        val intent = Intent()
+                        intent.component = ComponentName(
+                            module.appPackage,
+                            "ru.ogpscenter.ogpstracker.ui.EventsListActivity"
+                        )
+                        startActivity(intent)
+                    } catch (ex: Exception) {
+                        Log.e(TAG, ex.message)
+                    }
+                }
+
+                itemView.settings_text_view.setOnClickListener {
+                    try {
+                        val module = mAppAdapter.getItems()[adapterPosition]
+
+                        val intent = Intent()
+                        intent.component = ComponentName(
+                            module.appPackage,
+                            module.appSettings
+                        )
+                        startActivity(intent)
+                    } catch (ex: Exception) {
+                        Log.e(TAG, ex.message)
+                    }
                 }
             }
         }
