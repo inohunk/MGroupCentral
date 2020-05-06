@@ -2,6 +2,7 @@ package ru.hunkel.mgroupcentral.activities
 
 import android.Manifest
 import android.content.*
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -12,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.hunkel.mgroupcentral.R
 import ru.hunkel.mgrouprssichecker.IRSSILoggerService
@@ -80,7 +82,6 @@ class MainActivity : AppCompatActivity() {
             if (use_gps_tracking_checkbox.isChecked.not() && use_bluetooth_tracking_checkbox.isChecked) {
                 stopMGroupTrackerService()
             }
-            showMessage("Stopped")
         } else {
             if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
                 startOGPSTrackerService()
@@ -128,19 +129,16 @@ class MainActivity : AppCompatActivity() {
 
     //OGPSCenter service connection
     var mGpsService: IGPSTrackerServiceRemote? = null
-    var mOGPSTrackingServiceStarted: Boolean = false
 
     private val mOGPSCenterServiceConnection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
             mGpsService = null
             i(TAG, "ogpscenter service disconnected")
-            mOGPSTrackingServiceStarted = false
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mGpsService = IGPSTrackerServiceRemote.Stub.asInterface(service)
             try {
-                mOGPSTrackingServiceStarted = true
                 mGpsService!!.startTracking()
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -154,8 +152,25 @@ class MainActivity : AppCompatActivity() {
             "ru.ogpscenter.ogpstracker",
             "ru.ogpscenter.ogpstracker.service.GPSTrackerService"
         )
-        serviceIntent.action = "ru.ogpscenter.ogpstracker.service.GPSLoggerService"
+//        serviceIntent.action = "ru.ogpscenter.ogpstracker.service.GPSTrackerService"
         try {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                != PackageManager.PERMISSION_GRANTED
+                &&
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                askForLocationPermissions()
+            } else {
+                //do your work
+            }
+
             startService(serviceIntent)
             val res = bindService(
                 serviceIntent,
@@ -187,19 +202,16 @@ class MainActivity : AppCompatActivity() {
      * MGROUP SERVICE
      */
     var mMGroupService: IRSSILoggerService? = null
-    var mMGroupServiceStarted: Boolean = false
 
     //MGroup service connection
     private val mMGroupTrackerServiceConnection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
             mMGroupService = null
-            mMGroupServiceStarted = false
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mMGroupService = IRSSILoggerService.Stub.asInterface(service)
             try {
-                mMGroupServiceStarted = true
                 mMGroupService!!.start()
             } catch (ex: Exception) {
                 i(TAG, ex.message)
@@ -214,33 +226,31 @@ class MainActivity : AppCompatActivity() {
             "services.RSSILoggerService"
         )
 //        serviceIntent.action = "ru.hunkel.mgrouprssichecker.services.RSSILoggerService"
-//        try {
-//            startService(serviceIntent)
+        try {
+            startService(serviceIntent)
             val res = bindService(
                 serviceIntent,
                 mMGroupTrackerServiceConnection,
                 Context.BIND_AUTO_CREATE
             )
-//
-//        } catch (ex: Exception) {
-//            Log.e(TAG_O_GPS_CENTER, ex.message)
-//        }
+        } catch (ex: Exception) {
+            Log.e(TAG_M_GROUP_SERVICE, ex.message)
+        }
     }
 
     private fun stopMGroupTrackerService() {
         try {
             mMGroupService!!.stop()
             unbindService(mMGroupTrackerServiceConnection)
-            mMGroupServiceStarted = false
-//            val serviceIntent = Intent()
-//
-//            serviceIntent.component = ComponentName(
-//                "ru.hunkel.mgrouprssichecker",
-//                "services.RSSILoggerService"
-//            )
-//            serviceIntent.action = "ru.hunkel.mgrouprssichecker.services.RSSILoggerService"
-//
-//            stopService(serviceIntent)
+            val serviceIntent = Intent()
+
+            serviceIntent.component = ComponentName(
+                "ru.hunkel.mgrouprssichecker",
+                "services.RSSILoggerService"
+            )
+            serviceIntent.action = "ru.hunkel.mgrouprssichecker.services.RSSILoggerService"
+
+            stopService(serviceIntent)
         } catch (ex: Exception) {
             i(TAG, ex.message)
         }
