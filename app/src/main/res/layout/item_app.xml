@@ -61,24 +61,29 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/titleTextView">
 
-                <TextView
-                    android:id="@+id/registration_text_view"
+                <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="19dp"
-                    android:text="Registration"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    android:textSize="25sp" />
+                    android:id="@+id/expandable_list_view"
+                    android:layout_height="match_parent" />
+                <!--                <TextView-->
+                <!--                    android:id="@+id/registration_text_view"-->
+                <!--                    android:visibility="gone"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginLeft="19dp"-->
+                <!--                    android:text="Registration"-->
+                <!--                    android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
+                <!--                    android:textSize="25sp" />-->
 
-                <TextView
-                    android:id="@+id/settings_text_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="19dp"
-                    android:layout_marginTop="5dp"
-                    android:text="Settings"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                    android:textSize="25sp" />
+                <!--                <TextView-->
+                <!--                    android:id="@+id/settings_text_view"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginLeft="19dp"-->
+                <!--                    android:layout_marginTop="5dp"-->
+                <!--                    android:text="Settings"-->
+                <!--                    android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
+                <!--                    android:textSize="25sp" />-->
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

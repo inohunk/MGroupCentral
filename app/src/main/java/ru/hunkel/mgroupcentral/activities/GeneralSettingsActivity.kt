@@ -78,12 +78,6 @@ class GeneralSettingsActivity : AppCompatActivity() {
                 expandableLayout = view.expandable_layout
 
                 itemView.setOnClickListener {
-                    val module: Module = moduleList.get(adapterPosition)
-                    module.expanded = !module.expanded
-                    notifyItemChanged(adapterPosition)
-                }
-
-                itemView.registration_text_view.setOnClickListener {
                     try {
                         val module = mAppAdapter.getItems()[adapterPosition]
 
@@ -96,9 +90,30 @@ class GeneralSettingsActivity : AppCompatActivity() {
                     } catch (ex: Exception) {
                         Log.e(TAG, ex.message)
                     }
+                    val module: Module = moduleList.get(adapterPosition)
+//                    if (module.appPackage == "ru.ogpscenter.ogpstracker") it.registration_text_view.visibility =
+//                        View.VISIBLE
+//                    module.expanded = !module.expanded
+//                    notifyItemChanged(adapterPosition)
+
                 }
 
-                itemView.settings_text_view.setOnClickListener {
+//                itemView.registration_text_view.setOnClickListener {
+//                    try {
+//                        val module = mAppAdapter.getItems()[adapterPosition]
+//
+//                        val intent = Intent()
+//                        intent.component = ComponentName(
+//                            module.appPackage,
+//                            "ru.ogpscenter.ogpstracker.ui.EventsListActivity"
+//                        )
+//                        startActivity(intent)
+//                    } catch (ex: Exception) {
+//                        Log.e(TAG, ex.message)
+//                    }
+//                }
+
+                itemView.module_settings_button.setOnClickListener {
                     try {
                         val module = mAppAdapter.getItems()[adapterPosition]
 
