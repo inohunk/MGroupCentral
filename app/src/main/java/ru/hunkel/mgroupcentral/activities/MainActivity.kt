@@ -55,6 +55,13 @@ class MainActivity : AppCompatActivity() {
             changeTrackingState()
             updateUI()
         }
+        module_settings_button.setOnClickListener {
+            val intent = Intent(
+                this,
+                GeneralSettingsActivity::class.java
+            )
+            startActivity(intent)
+        }
     }
 
     private fun showMessage(string: String) {
@@ -149,7 +156,7 @@ class MainActivity : AppCompatActivity() {
         )
         serviceIntent.action = "ru.ogpscenter.ogpstracker.service.GPSLoggerService"
         try {
-//            startService(serviceIntent)
+            startService(serviceIntent)
             val res = bindService(
                 serviceIntent,
                 mOGPSCenterServiceConnection,
@@ -172,7 +179,7 @@ class MainActivity : AppCompatActivity() {
 //            serviceIntent.action = "ru.ogpscenter.ogpstracker.service.GPSLoggerService"
 //            stopService(serviceIntent)
         } catch (ex: Exception) {
-            i(TAG, ex.message)
+            ex.printStackTrace()
         }
     }
 
