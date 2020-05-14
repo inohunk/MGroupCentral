@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     //Service variables
     //Start status variables
     private var mIsMGroupServiceStarted = false
+    private var mIsGpsTrackerServiceStarted = false
 
     //Bound status variables
     private var mIsMGroupServiceBounded = false
@@ -54,6 +55,7 @@ class MainActivity : AppCompatActivity() {
             try {
 
                 mGpsService!!.startTracking()
+                mIsGpsTrackerServiceStarted = true
                 updateUI()
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -101,6 +103,7 @@ class MainActivity : AppCompatActivity() {
         try {
             mGpsService!!.stopTracking()
             unbindService(mOGPSCenterServiceConnection)
+            mIsGpsTrackerServiceStarted = false
 //            val serviceIntent = Intent()
 //            serviceIntent.component = ComponentName(
 //                "ru.ogpscenter.ogpstracker",
@@ -163,6 +166,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun betaStartMGroupTrackerService() {
+        mIsMGroupServiceNeedToBeStarted = true
+
+        val serviceIntent = Intent(this, RSSILoggerService::class.java)
+        startService(serviceIntent)
+        bindService(
+            serviceIntent,
+            mMGroupTrackerServiceConnection,
+            Context.BIND_WAIVE_PRIORITY
+        )
+
+//        mIsSearching = true
+//        mIsServiceBounded = false
+//        mIsServiceStarted = false
+        updateUI()
+    }
+
+    private fun betaStopMGroupTrackerService() {
+        try {
+            mMGroupService?.stop()
+            unbindService(mMGroupTrackerServiceConnection)
+            stopService(Intent(this, RSSILoggerService::class.java))
+        } catch (ex: Exception) {
+            Toast.makeText(this, ex.message, Toast.LENGTH_SHORT).show()
+        }
+
+        mIsMGroupServiceStarted = false
+        mIsMGroupServiceBounded = false
+//        mIsSearching = false
+        updateUI()
+    }
+
     private fun stopMGroupTrackerService() {
         try {
             mMGroupService!!.stop()
@@ -208,6 +243,33 @@ class MainActivity : AppCompatActivity() {
         setButtonListeners()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        checkForServiceAvailability()
+        updateUI()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unbindService(mOGPSCenterServiceConnection)
+            unbindService(mMGroupTrackerServiceConnection)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+    override fun onDestroy() {
+        try {
+            unbindService(mOGPSCenterServiceConnection)
+            unbindService(mMGroupTrackerServiceConnection)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        super.onDestroy()
+    }
+
     private fun setButtonListeners() {
         start_stop_button.setOnClickListener {
             changeTrackingState()
@@ -228,25 +290,55 @@ class MainActivity : AppCompatActivity() {
 
     private fun changeTrackingState() {
         if (mIsTracking) {
-            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
+            if (
+                use_bluetooth_tracking_checkbox.isChecked &&
+                use_gps_tracking_checkbox.isChecked &&
+                mIsMGroupServiceStarted &&
+                mIsGpsTrackerServiceStarted
+            ) {
                 stopMGroupTrackerService()
                 stopOGPSTrackerService()
             }
-            if (use_gps_tracking_checkbox.isChecked && use_bluetooth_tracking_checkbox.isChecked.not()) {
+            if (
+                use_gps_tracking_checkbox.isChecked &&
+                use_bluetooth_tracking_checkbox.isChecked.not() &&
+                mIsMGroupServiceStarted.not() &&
+                mIsGpsTrackerServiceStarted
+            ) {
                 stopOGPSTrackerService()
             }
-            if (use_gps_tracking_checkbox.isChecked.not() && use_bluetooth_tracking_checkbox.isChecked) {
+            if (
+                use_gps_tracking_checkbox.isChecked.not() &&
+                use_bluetooth_tracking_checkbox.isChecked &&
+                mIsMGroupServiceStarted &&
+                mIsGpsTrackerServiceStarted.not()
+            ) {
                 stopMGroupTrackerService()
             }
         } else {
-            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
+            if (
+                use_bluetooth_tracking_checkbox.isChecked &&
+                use_gps_tracking_checkbox.isChecked &&
+                mIsMGroupServiceStarted.not() &&
+                mIsGpsTrackerServiceStarted.not()
+            ) {
                 startOGPSTrackerService()
                 startMGroupTrackerService()
             }
-            if (use_bluetooth_tracking_checkbox.isChecked.not() && use_gps_tracking_checkbox.isChecked) {
+            if (
+                use_bluetooth_tracking_checkbox.isChecked.not() &&
+                use_gps_tracking_checkbox.isChecked &&
+                mIsMGroupServiceStarted.not() &&
+                mIsGpsTrackerServiceStarted.not()
+            ) {
                 startOGPSTrackerService()
             }
-            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked.not()) {
+            if (
+                use_bluetooth_tracking_checkbox.isChecked &&
+                use_gps_tracking_checkbox.isChecked.not() &&
+                mIsMGroupServiceStarted.not() &&
+                mIsGpsTrackerServiceStarted.not()
+            ) {
                 startMGroupTrackerService()
             }
         }
@@ -306,10 +398,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        if (mIsMGroupServiceStarted) {
+        if (mIsMGroupServiceStarted && mIsGpsTrackerServiceStarted.not()) {
             start_stop_button.text = "Stop"
             use_bluetooth_tracking_checkbox.isEnabled = false
             use_gps_tracking_checkbox.isEnabled = false
+            use_bluetooth_tracking_checkbox.isChecked = true
+        } else if (mIsGpsTrackerServiceStarted && mIsMGroupServiceStarted.not()) {
+            start_stop_button.text = "Stop"
+            use_bluetooth_tracking_checkbox.isEnabled = false
+            use_gps_tracking_checkbox.isEnabled = false
+            use_gps_tracking_checkbox.isChecked = true
+
+        } else if (mIsGpsTrackerServiceStarted && mIsMGroupServiceStarted) {
+            start_stop_button.text = "Stop"
+            use_bluetooth_tracking_checkbox.isEnabled = false
+            use_gps_tracking_checkbox.isEnabled = false
+
+            use_gps_tracking_checkbox.isChecked = true
+            use_bluetooth_tracking_checkbox.isChecked = true
+
         } else {
             start_stop_button.text = "Start"
             use_bluetooth_tracking_checkbox.isEnabled = true
