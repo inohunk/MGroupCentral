@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.settings_activity.*
 import ru.hunkel.mgroupcentral.R
 import ru.hunkel.mgroupcentral.database.entities.Module
 import ru.hunkel.mgroupcentral.managers.MGroupDatabaseManager
-import ru.hunkel.mgroupcentral.models.MODULE_TITLES
+import ru.hunkel.mgroupcentral.utils.MODULE_TITLES
 
 class GeneralSettingsActivity : AppCompatActivity() {
 
