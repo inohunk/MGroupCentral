@@ -2,8 +2,10 @@ package ru.hunkel.mgroupcentral.ui.activities
 
 import android.Manifest
 import android.app.ActivityManager
+import android.bluetooth.BluetoothAdapter
 import android.content.*
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -17,7 +19,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.hunkel.mgroupcentral.R
+import ru.hunkel.mgroupcentral.managers.MGroupDatabaseManager
 import ru.hunkel.mgroupcentral.services.RSSILoggerService
+import ru.hunkel.mgroupcentral.utils.MODULE_TITLES
 import ru.hunkel.mgrouprssichecker.IRSSILoggerService
 import ru.ogpscenter.ogpstracker.service.IGPSTrackerServiceRemote
 
@@ -40,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     //Need to be started variables
     private var mIsMGroupServiceNeedToBeStarted = false
 
+    lateinit var mDatabaseManager: MGroupDatabaseManager
 
     //OGPSCenter service connection
     var mGpsService: IGPSTrackerServiceRemote? = null
@@ -240,6 +245,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        mDatabaseManager = MGroupDatabaseManager(this)
+        checkForServiceInstalled()
         setButtonListeners()
     }
 
@@ -250,22 +257,21 @@ class MainActivity : AppCompatActivity() {
         updateUI()
     }
 
-    override fun onPause() {
-        super.onPause()
-        try {
-            unbindService(mOGPSCenterServiceConnection)
-            unbindService(mMGroupTrackerServiceConnection)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-    }
-
-    override fun onDestroy() {
-        try {
-            unbindService(mOGPSCenterServiceConnection)
-            unbindService(mMGroupTrackerServiceConnection)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
+    private fun checkForServiceInstalled() {
+        val modulesList = mDatabaseManager.actionGetAllModules()
+        modulesList.forEach { module ->
+            MODULE_TITLES.forEach { moduleTitles ->
+                if (module.appPackage == moduleTitles.key) {
+                    if (module.appPackage == "ru.ogpscenter.ogpstracker") {
+                        use_gps_tracking_checkbox.isEnabled = true
+                        use_gps_tracking_checkbox.setTextColor(resources.getColor(android.R.color.black))
+                    }
+                    if (module.appPackage == "ru.hunkel.mgrouprssicecker") {
+                        use_bluetooth_tracking_checkbox.isEnabled = true
+                        use_bluetooth_tracking_checkbox.setTextColor(resources.getColor(android.R.color.black))
+                    }
+                }
+            }
         }
         super.onDestroy()
     }
@@ -411,8 +417,9 @@ class MainActivity : AppCompatActivity() {
 
         } else {
             start_stop_button.text = "Start"
-            use_bluetooth_tracking_checkbox.isEnabled = true
-            use_gps_tracking_checkbox.isEnabled = true
+            checkForServiceInstalled()
+//            use_bluetooth_tracking_checkbox.isEnabled = true
+//            use_gps_tracking_checkbox.isEnabled = true
         }
     }
 }
