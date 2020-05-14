@@ -24,11 +24,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.GeneralSettingsActivity"
-            android:label="@string/title_activity_general_settings"></activity>
+            android:name="ru.hunkel.mgroupcentral.ui.activities.GeneralSettingsActivity"
+            android:label="@string/title_activity_general_settings" />
 
         <service
-            android:name="services.RSSILoggerService"
+            android:name=".services.RSSILoggerService"
             android:enabled="true"
             android:process=":LoggerProcess" />
         <service
@@ -37,7 +37,7 @@
             android:exported="true"
             android:process=":MGroupService" />
 
-        <activity android:name=".activities.MainActivity">
+        <activity android:name="ru.hunkel.mgroupcentral.ui.activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

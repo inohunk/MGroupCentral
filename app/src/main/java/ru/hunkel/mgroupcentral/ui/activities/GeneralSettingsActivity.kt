@@ -1,4 +1,4 @@
-package ru.hunkel.mgroupcentral.activities
+package ru.hunkel.mgroupcentral.ui.activities
 
 import android.content.ComponentName
 import android.content.Intent

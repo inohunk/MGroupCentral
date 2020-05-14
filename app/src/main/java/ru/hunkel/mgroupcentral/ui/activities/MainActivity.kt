@@ -1,4 +1,4 @@
-package ru.hunkel.mgroupcentral.activities
+package ru.hunkel.mgroupcentral.ui.activities
 
 import android.Manifest
 import android.app.ActivityManager
@@ -292,54 +292,46 @@ class MainActivity : AppCompatActivity() {
         if (mIsTracking) {
             if (
                 use_bluetooth_tracking_checkbox.isChecked &&
-                use_gps_tracking_checkbox.isChecked &&
-                mIsMGroupServiceStarted &&
-                mIsGpsTrackerServiceStarted
+                use_gps_tracking_checkbox.isChecked
             ) {
-                stopMGroupTrackerService()
+//                stopMGroupTrackerService()
+                betaStopMGroupTrackerService()
                 stopOGPSTrackerService()
             }
             if (
                 use_gps_tracking_checkbox.isChecked &&
-                use_bluetooth_tracking_checkbox.isChecked.not() &&
-                mIsMGroupServiceStarted.not() &&
-                mIsGpsTrackerServiceStarted
+                use_bluetooth_tracking_checkbox.isChecked.not()
             ) {
                 stopOGPSTrackerService()
             }
             if (
                 use_gps_tracking_checkbox.isChecked.not() &&
-                use_bluetooth_tracking_checkbox.isChecked &&
-                mIsMGroupServiceStarted &&
-                mIsGpsTrackerServiceStarted.not()
+                use_bluetooth_tracking_checkbox.isChecked
             ) {
-                stopMGroupTrackerService()
+//                stopMGroupTrackerService()
+                betaStopMGroupTrackerService()
             }
         } else {
             if (
                 use_bluetooth_tracking_checkbox.isChecked &&
-                use_gps_tracking_checkbox.isChecked &&
-                mIsMGroupServiceStarted.not() &&
-                mIsGpsTrackerServiceStarted.not()
+                use_gps_tracking_checkbox.isChecked
             ) {
                 startOGPSTrackerService()
-                startMGroupTrackerService()
+                betaStartMGroupTrackerService()
+//                startMGroupTrackerService()
             }
             if (
                 use_bluetooth_tracking_checkbox.isChecked.not() &&
-                use_gps_tracking_checkbox.isChecked &&
-                mIsMGroupServiceStarted.not() &&
-                mIsGpsTrackerServiceStarted.not()
+                use_gps_tracking_checkbox.isChecked
             ) {
                 startOGPSTrackerService()
             }
             if (
                 use_bluetooth_tracking_checkbox.isChecked &&
-                use_gps_tracking_checkbox.isChecked.not() &&
-                mIsMGroupServiceStarted.not() &&
-                mIsGpsTrackerServiceStarted.not()
+                use_gps_tracking_checkbox.isChecked.not()
             ) {
-                startMGroupTrackerService()
+//                startMGroupTrackerService()
+                betaStartMGroupTrackerService()
             }
         }
         mIsTracking = !mIsTracking

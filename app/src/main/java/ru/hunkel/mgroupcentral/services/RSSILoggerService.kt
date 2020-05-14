@@ -22,11 +22,11 @@ import models.Beacon
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.hunkel.mgroupcentral.R
-import ru.hunkel.mgroupcentral.activities.MainActivity
 import ru.hunkel.mgroupcentral.database.manager.DatabaseManager
 import ru.hunkel.mgroupcentral.models.IBeacon
 import ru.hunkel.mgroupcentral.network.DataSender
 import ru.hunkel.mgroupcentral.receivers.NetworkStateReceiver
+import ru.hunkel.mgroupcentral.ui.activities.MainActivity
 import ru.hunkel.mgrouprssichecker.IRSSILoggerService
 import ru.ogpscenter.ogpstracker.service.IGPSTrackerServiceRemote
 import utils.*
