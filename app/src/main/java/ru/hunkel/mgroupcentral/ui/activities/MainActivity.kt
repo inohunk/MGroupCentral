@@ -29,6 +29,8 @@ import ru.ogpscenter.ogpstracker.service.IGPSTrackerServiceRemote
 const val TAG = "MainActivity"
 private const val TAG_O_GPS_CENTER = "OGPSCenter"
 private const val TAG_M_GROUP_SERVICE = "MGroupService"
+private const val REQUEST_GPS = 1
+private const val REQUEST_BLUETOOTH = 2
 
 class MainActivity : AppCompatActivity() {
     private var mIsTracking = false
@@ -174,6 +176,21 @@ class MainActivity : AppCompatActivity() {
     private fun betaStartMGroupTrackerService() {
         mIsMGroupServiceNeedToBeStarted = true
 
+        when (Build.VERSION.SDK_INT) {
+            in Build.VERSION.SDK_INT..Build.VERSION_CODES.P -> {
+                acceptPermissions(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION
+//                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ), REQUEST_GPS
+                )
+            }
+
+            Build.VERSION_CODES.Q -> {
+                requestBackgroundPermission()
+            }
+        }
+
         val serviceIntent = Intent(this, RSSILoggerService::class.java)
         startService(serviceIntent)
         bindService(
@@ -273,7 +290,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        super.onDestroy()
     }
 
     private fun setButtonListeners() {
@@ -343,14 +359,138 @@ class MainActivity : AppCompatActivity() {
         mIsTracking = !mIsTracking
     }
 
+    private fun requestBackgroundPermission() {
+        val hasForegroundLocationPermission = ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasForegroundLocationPermission) {
+            val hasBackgroundLocationPermission = ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasBackgroundLocationPermission) {
+                acceptPermissions(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION
+//                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ), REQUEST_GPS
+                )
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                    REQUEST_GPS
+                )
+            }
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ), REQUEST_GPS
+            )
+        }
+    }
+
+    private fun acceptPermissions(permissions: Array<String>, requestCode: Int) {
+        var allPermissionsGranted = true
+
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    permission
+                ) == PackageManager.PERMISSION_DENIED
+            ) {
+                allPermissionsGranted = false
+            }
+        }
+
+        if (allPermissionsGranted) {
+            requestEnableBluetooth()
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(permissions, REQUEST_GPS)
+            } else {
+                requestEnableBluetooth()
+            }
+        }
+    }
+
+    private fun requestEnableBluetooth() {
+        try {
+            val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+            if (mBluetoothAdapter.isEnabled) {
+                betaStartMGroupTrackerService()
+            } else {
+                val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(intent, REQUEST_BLUETOOTH)
+            }
+        } catch (ex: Exception) {
+//            File(filesDir.absolutePath + "errors").writeText(ex.message!!, Charsets.UTF_8)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        var permissionsAccepted = true
+
+        when (requestCode) {
+            REQUEST_GPS -> {
+                permissions.forEachIndexed { index, _ ->
+                    if (grantResults[index] == PackageManager.PERMISSION_DENIED) {
+                        permissionsAccepted = false
+                    }
+                }
+                if (permissionsAccepted) {
+                    try {
+                        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+                        if (mBluetoothAdapter.isEnabled) {
+                            betaStartMGroupTrackerService()
+                        } else {
+                            val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                            startActivityForResult(
+                                intent,
+                                REQUEST_BLUETOOTH
+                            )
+                        }
+                    } catch (ex: Exception) {
+//                        File(filesDir.absolutePath + "errors").writeText(
+//                            ex.message!!,
+//                            Charsets.UTF_8
+//                        )
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        "You need to accept all permissions for start scan",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+
+            }
+        }
+    }
+
     private fun checkForServiceAvailability() {
         if (isServiceRunning(RSSILoggerService::class.java)) {
             mIsMGroupServiceStarted = true
+            mIsGpsTrackerServiceStarted = true
             bindService(
                 Intent(this, RSSILoggerService::class.java),
                 mMGroupTrackerServiceConnection,
                 Context.BIND_AUTO_CREATE
             )
+            updateUI()
         }
     }
 
