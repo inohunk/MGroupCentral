@@ -2,14 +2,14 @@ package ru.hunkel.mgroupcentral.managers
 
 import android.content.Context
 import android.util.Log
-import ru.hunkel.mgroupcentral.database.MGroupDatabase
+import ru.hunkel.mgroupcentral.database.MGroupCentralDatabase
 import ru.hunkel.mgroupcentral.database.entities.Module
 
 const val TAG = "MGroupDatabaseManager"
 
 class MGroupDatabaseManager(context: Context) {
 
-    private var mDatabase = MGroupDatabase.getInstance(context)
+    private var mDatabase = MGroupCentralDatabase.getInstance(context)
 
     fun actionAddModule(module: Module) {
         val insertedId = mDatabase.trackingModel().addModule(module)

@@ -28,6 +28,10 @@
             android:label="@string/title_activity_general_settings"></activity>
 
         <service
+            android:name="services.RSSILoggerService"
+            android:enabled="true"
+            android:process=":LoggerProcess" />
+        <service
             android:name=".services.MGroupService"
             android:enabled="true"
             android:exported="true"

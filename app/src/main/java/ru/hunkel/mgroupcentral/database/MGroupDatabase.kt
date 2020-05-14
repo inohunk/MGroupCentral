@@ -4,21 +4,21 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import database.entities.*
 import kotlinx.coroutines.runBlocking
-import ru.hunkel.mgroupcentral.database.dao.ModulesDao
-import ru.hunkel.mgroupcentral.database.entities.Module
+import ru.hunkel.mgroupcentral.database.dao.TrackingDao
 
 @Database(
-    entities = [Module::class],
-    version = 3
+    entities = [ControlPoints::class, Events::class, Punches::class, UserInfo::class, DeviceInfo::class],
+    version = 7
 )
+
 abstract class MGroupDatabase : RoomDatabase() {
-    abstract fun trackingModel(): ModulesDao
+    abstract fun trackingModel(): TrackingDao
 
     companion object {
         private var INSTANCE: MGroupDatabase? = null
+        //TODO ADD MIGRATIONS
 
         fun getInstance(context: Context): MGroupDatabase {
             if (INSTANCE == null) {
@@ -26,28 +26,15 @@ abstract class MGroupDatabase : RoomDatabase() {
                     INSTANCE = Room.databaseBuilder(
                         context.applicationContext,
                         MGroupDatabase::class.java,
-                        "mgroup-database"
+                        "tracking-database"
                     )
                         //TODO used only for primary testing. In future rewrite all database queries with coroutines
                         .allowMainThreadQueries()
-                        .addMigrations(MIGRATION_1_2)
-                        .addMigrations(MIGRATION_2_3)
+//                      .fallbackToDestructiveMigration()
                         .build()
                 }
             }
             return INSTANCE!!
         }
-    }
-}
-
-val MIGRATION_1_2 = object : Migration(1, 2) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE module ADD COLUMN appSettings TEXT NOT NULL DEFAULT ''")
-    }
-}
-
-val MIGRATION_2_3 = object : Migration(2, 3) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE module ADD COLUMN appService TEXT NOT NULL DEFAULT ''")
     }
 }

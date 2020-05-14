@@ -1,6 +1,7 @@
 package ru.hunkel.mgroupcentral.activities
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -16,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.hunkel.mgroupcentral.R
+import ru.hunkel.mgroupcentral.services.RSSILoggerService
 import ru.hunkel.mgrouprssichecker.IRSSILoggerService
 import ru.ogpscenter.ogpstracker.service.IGPSTrackerServiceRemote
 
@@ -27,105 +29,16 @@ private const val TAG_M_GROUP_SERVICE = "MGroupService"
 class MainActivity : AppCompatActivity() {
     private var mIsTracking = false
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_overflow_menu, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
+    //Service variables
+    //Start status variables
+    private var mIsMGroupServiceStarted = false
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.settings_menu_button -> {
-                val intent = Intent(
-                    this,
-                    GeneralSettingsActivity::class.java
-                )
-                startActivity(intent)
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
+    //Bound status variables
+    private var mIsMGroupServiceBounded = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    //Need to be started variables
+    private var mIsMGroupServiceNeedToBeStarted = false
 
-        setButtonListeners()
-    }
-
-    private fun setButtonListeners() {
-        start_stop_button.setOnClickListener {
-            changeTrackingState()
-            updateUI()
-        }
-        module_settings_button.setOnClickListener {
-            val intent = Intent(
-                this,
-                GeneralSettingsActivity::class.java
-            )
-            startActivity(intent)
-        }
-    }
-
-    private fun showMessage(string: String) {
-        Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun changeTrackingState() {
-        if (mIsTracking) {
-            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
-                stopMGroupTrackerService()
-                stopOGPSTrackerService()
-            }
-            if (use_gps_tracking_checkbox.isChecked && use_bluetooth_tracking_checkbox.isChecked.not()) {
-                stopOGPSTrackerService()
-            }
-            if (use_gps_tracking_checkbox.isChecked.not() && use_bluetooth_tracking_checkbox.isChecked) {
-                stopMGroupTrackerService()
-            }
-        } else {
-            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
-                startOGPSTrackerService()
-                startMGroupTrackerService()
-            }
-            if (use_bluetooth_tracking_checkbox.isChecked.not() && use_gps_tracking_checkbox.isChecked) {
-                startOGPSTrackerService()
-            }
-            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked.not()) {
-                startMGroupTrackerService()
-            }
-        }
-        mIsTracking = !mIsTracking
-    }
-
-    private fun askForLocationPermissions() {
-
-        // Should we show an explanation?
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        ) {
-            AlertDialog.Builder(this)
-                .setTitle("Location permessions needed")
-                .setMessage("you need to allow this permission!")
-                .setPositiveButton(
-                    "Sure",
-                    DialogInterface.OnClickListener { dialog, which ->
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            1
-                        )
-                    })
-                .setNegativeButton(
-                    "Not now",
-                    DialogInterface.OnClickListener { dialog, which ->
-                        //                                        //Do nothing
-                    })
-                .show()
-        } else {
-        }
-    }
 
     //OGPSCenter service connection
     var mGpsService: IGPSTrackerServiceRemote? = null
@@ -139,7 +52,9 @@ class MainActivity : AppCompatActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mGpsService = IGPSTrackerServiceRemote.Stub.asInterface(service)
             try {
+
                 mGpsService!!.startTracking()
+                updateUI()
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
@@ -211,15 +126,25 @@ class MainActivity : AppCompatActivity() {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             mMGroupService = IRSSILoggerService.Stub.asInterface(service)
+
             try {
-                mMGroupService!!.start()
+                mIsMGroupServiceBounded = true
+                mIsMGroupServiceStarted = true
+
+                if (mIsMGroupServiceNeedToBeStarted) {
+                    mMGroupService!!.start()
+                }
+                mIsMGroupServiceNeedToBeStarted = false
+                updateUI()
             } catch (ex: Exception) {
                 i(TAG, ex.message)
             }
         }
     }
 
+
     private fun startMGroupTrackerService() {
+        mIsMGroupServiceNeedToBeStarted = true
         val serviceIntent = Intent()
         serviceIntent.component = ComponentName(
             "ru.hunkel.mgrouprssichecker",
@@ -251,13 +176,137 @@ class MainActivity : AppCompatActivity() {
             serviceIntent.action = "ru.hunkel.mgrouprssichecker.services.RSSILoggerService"
 
             stopService(serviceIntent)
+            mIsMGroupServiceStarted = false
+            mIsMGroupServiceBounded = false
         } catch (ex: Exception) {
-            i(TAG, ex.message)
+            ex.printStackTrace()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_overflow_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.settings_menu_button -> {
+                val intent = Intent(
+                    this,
+                    GeneralSettingsActivity::class.java
+                )
+                startActivity(intent)
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        setButtonListeners()
+    }
+
+    private fun setButtonListeners() {
+        start_stop_button.setOnClickListener {
+            changeTrackingState()
+            updateUI()
+        }
+        module_settings_button.setOnClickListener {
+            val intent = Intent(
+                this,
+                GeneralSettingsActivity::class.java
+            )
+            startActivity(intent)
+        }
+    }
+
+    private fun showMessage(string: String) {
+        Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun changeTrackingState() {
+        if (mIsTracking) {
+            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
+                stopMGroupTrackerService()
+                stopOGPSTrackerService()
+            }
+            if (use_gps_tracking_checkbox.isChecked && use_bluetooth_tracking_checkbox.isChecked.not()) {
+                stopOGPSTrackerService()
+            }
+            if (use_gps_tracking_checkbox.isChecked.not() && use_bluetooth_tracking_checkbox.isChecked) {
+                stopMGroupTrackerService()
+            }
+        } else {
+            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked) {
+                startOGPSTrackerService()
+                startMGroupTrackerService()
+            }
+            if (use_bluetooth_tracking_checkbox.isChecked.not() && use_gps_tracking_checkbox.isChecked) {
+                startOGPSTrackerService()
+            }
+            if (use_bluetooth_tracking_checkbox.isChecked && use_gps_tracking_checkbox.isChecked.not()) {
+                startMGroupTrackerService()
+            }
+        }
+        mIsTracking = !mIsTracking
+    }
+
+    private fun checkForServiceAvailability() {
+        if (isServiceRunning(RSSILoggerService::class.java)) {
+            mIsMGroupServiceStarted = true
+            bindService(
+                Intent(this, RSSILoggerService::class.java),
+                mMGroupTrackerServiceConnection,
+                Context.BIND_AUTO_CREATE
+            )
+        }
+    }
+
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val activityManager =
+            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun askForLocationPermissions() {
+
+        // Should we show an explanation?
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
+            AlertDialog.Builder(this)
+                .setTitle("Location permessions needed")
+                .setMessage("you need to allow this permission!")
+                .setPositiveButton(
+                    "Sure",
+                    DialogInterface.OnClickListener { dialog, which ->
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            1
+                        )
+                    })
+                .setNegativeButton(
+                    "Not now",
+                    DialogInterface.OnClickListener { dialog, which ->
+                        //                                        //Do nothing
+                    })
+                .show()
+        } else {
         }
     }
 
     private fun updateUI() {
-        if (mIsTracking) {
+        if (mIsMGroupServiceStarted) {
             start_stop_button.text = "Stop"
             use_bluetooth_tracking_checkbox.isEnabled = false
             use_gps_tracking_checkbox.isEnabled = false
